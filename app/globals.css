@@ -150,10 +150,10 @@
 @keyframes border-pulse {
   0%, 100% {
     border-color: rgba(163, 230, 53, 0.3);
-    box-shadow: 0 0 10px rgba(163, 230, 53, 0.2);
+    box-shadow: 0 0 5px rgba(163, 230, 53, 0.1);
   }
   50% {
     border-color: rgba(163, 230, 53, 0.8);
-    box-shadow: 0 0 20px rgba(163, 230, 53, 0.5);
+    box-shadow: 0 0 10px rgba(163, 230, 53, 0.25);
   }
 }

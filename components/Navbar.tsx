@@ -8,7 +8,7 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 w-full z-50">
       <div className="max-w-7xl mx-auto  py-6 flex items-center justify-between">
-        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-lime-400/30 pl-2 pr-5 py-2 shadow-[0_8px_32px_0_rgba(163,230,53,0.15)]">
+        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-lime-400/30 pl-2 pr-5 py-2 shadow-[0_4px_16px_0_rgba(163,230,53,0.08)]">
           <Image
             src="/logo.png"
             alt="GOTCHA.AI Logo"

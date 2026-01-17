@@ -30,7 +30,7 @@ const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>(
         className={cn(
           glassButtonVariants({ size }),
           'border-lime-400/30 bg-white/10 hover:bg-white/20 hover:border-lime-400/50',
-          'shadow-[0_8px_32px_0_rgba(163,230,53,0.15)] hover:shadow-[0_12px_40px_0_rgba(163,230,53,0.25)]',
+          'shadow-[0_4px_16px_0_rgba(163,230,53,0.08)] hover:shadow-[0_6px_20px_0_rgba(163,230,53,0.12)]',
           'hover:-translate-y-0.5 active:translate-y-0',
           className,
         )}
