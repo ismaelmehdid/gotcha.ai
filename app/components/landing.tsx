@@ -1,7 +1,7 @@
 'use client';
 
 import { HeroSection } from '@/components/hero-section';
-import { Navbar } from '@/components/navbar';
+import { Navbar } from '@/components/app-navbar';
 
 export default function Landing() {
   return (

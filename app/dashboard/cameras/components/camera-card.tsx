@@ -2,9 +2,12 @@
 
 import { Power, PowerOff, Video } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import type { CameraDTO } from '@/application/dto-types/camera-dto';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface CameraCardProps {
   camera: CameraDTO;
@@ -105,6 +108,34 @@ export function CameraCard({ camera, onUpdate }: CameraCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isActive && (
+          <div className="w-full rounded-lg overflow-hidden bg-black/20">
+            <ReactPlayer
+              url={camera.rtspUrl}
+              playing={isActive}
+              controls
+              muted
+              width="100%"
+              height="auto"
+              config={{
+                file: {
+                  attributes: {
+                    controlsList: 'nodownload',
+                  },
+                  forceHLS: true,
+                  hlsOptions: {
+                    lowLatencyMode: true,
+                  },
+                },
+              }}
+              onError={(error) => {
+                console.error('Video player error:', error);
+                setError('Failed to load video stream. RTSP streams require HLS conversion.');
+              }}
+            />
+          </div>
+        )}
+
         <div className="text-sm text-white/70">
           <p>
             <span className="font-medium">RTSP URL:</span> {camera.rtspUrl}
@@ -112,7 +143,7 @@ export function CameraCard({ camera, onUpdate }: CameraCardProps) {
         </div>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 text-red-400 text-sm p-3">
+          <div className="bg-red-500/20 border border-red-500/50 text-red-400 text-sm p-3 rounded">
             {error}
           </div>
         )}
