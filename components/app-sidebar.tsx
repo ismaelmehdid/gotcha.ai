@@ -36,7 +36,8 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="none"
-      className="border-r border-lime-400/30 bg-black/50 backdrop-blur-md"
+      variant="inset"
+      className="border-lime-400/30 bg-black/50 backdrop-blur-md"
     >
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-3">
@@ -75,7 +76,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="pb-4 shrink-0">
+      <SidebarFooter className="">
         <SidebarMenu className="space-y-2 px-4">
           {navigationFooterItems.map((item) => {
             const Icon = item.icon;
