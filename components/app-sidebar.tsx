@@ -1,6 +1,7 @@
 'use client';
 
 import { Camera, House, LogOut } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -40,8 +41,14 @@ export function AppSidebar() {
       className="border-lime-400/30 bg-black/50 backdrop-blur-md"
     >
       <SidebarHeader className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-lime-400/20 backdrop-blur-sm border border-lime-400/40"></div>
+        <div className="flex items-center gap-1.5">
+          <Image
+            src="/logo.png"
+            alt="GOTCHA.AI Logo"
+            width={40}
+            height={40}
+            className="w-10 h-10"
+          />
           <span className="text-xl font-bold text-white">GOTCHA.AI</span>
         </div>
       </SidebarHeader>

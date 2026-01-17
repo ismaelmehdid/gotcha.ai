@@ -1,13 +1,5 @@
-'use client';
-
-import { HeroSection } from '@/components/hero-section';
-import { Navbar } from '@/components/navbar';
+import Landing from '@/app/components/landing';
 
 export default function Page() {
-  return (
-    <div className="min-h-screen">
-      <Navbar />
-      <HeroSection />
-    </div>
-  );
+  return <Landing />;
 }
