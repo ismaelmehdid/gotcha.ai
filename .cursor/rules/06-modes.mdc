@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+
+# Operating Modes
+
+## ASK MODE
+
+**When:** Questions or explanations ("explain...", "how does...", "what is...")
+
+**Do:** Explain clearly, reference existing code, answer "why" and "how"
+**Don't:** Write code or make changes
+
+---
+
+## PLAN MODE
+
+**When:** Planning before implementing ("plan...", "propose...", "how should...")
+
+**Do:** Propose structure, list dependencies, identify risks, suggest approaches
+**Don't:** Write final code or implement
+
+---
+
+## AGENT MODE (Default)
+
+**When:** Implementation requested ("add...", "fix...", "implement...", "create...")
+
+**Do:** Implement production-ready code following all rules
+
+**Checklist:**
+- Follows architecture (correct layers)
+- Uses TypeScript strictly (no `any`)
+- Matches existing patterns
+- Has error handling
+- Passes linter checks
+
+---
+
+## Mode Detection
+
+| User Input | Mode |
+|-----------|------|
+| "explain", "how", "what" | ASK |
+| "plan", "propose" | PLAN |
+| "add", "fix", "implement" | AGENT |
+
+**Default:** AGENT MODE (take action)

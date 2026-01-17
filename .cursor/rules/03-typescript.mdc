@@ -1,0 +1,90 @@
+---
+alwaysApply: true
+---
+
+# TypeScript
+
+## Strictness
+
+### Type Safety Rules
+
+| ❌ Never Use | ✅ Use Instead |
+|-------------|---------------|
+| `any` | `unknown` or specific type |
+| `@ts-ignore` | `@ts-expect-error` with explanation |
+| `object` or `Object` | Specific interface or type |
+| Type assertions | Type guards and validation |
+
+### Configuration
+
+All strict checks are enabled in `tsconfig.json`:
+
+- `strict: true`
+- `noUncheckedIndexedAccess: true` (array access may return `undefined`)
+- `strictNullChecks: true`
+- `noImplicitAny: true`
+
+## Type Organization
+
+### DOMAIN TYPES — HARD RULES
+
+Domain types represent business concepts and belong to their domain:
+
+```
+core/
+  types/
+    user/
+      user.ts              ✅ User domain types
+      user-role.ts
+    order/
+      order.ts             ✅ Order domain types
+      order-status.ts
+```
+
+### Rules
+
+1. **Domain types MUST live inside their domain folder**
+   - ✅ `core/types/user/user.ts`
+   - ❌ `types/user.ts`
+
+2. **Do NOT import domain types from other domains**
+   - ❌ Don't import `Order` types in `User` domain
+   - ✅ Use shared primitives or create relationships properly
+
+3. **Shared types must be primitive and business-agnostic**
+   - ✅ `type ID = string`
+   - ✅ `type Result<T, E> = { ok: true; value: T } | { ok: false; error: E }`
+   - ❌ `type UserOrOrder = User | Order`
+
+4. **If a type represents a business concept, it is NOT shared**
+   - Business concepts: `User`, `Order`, `Product`, `Payment`
+   - Primitives: `ID`, `Timestamp`, `Result`, `Pagination`
+
+5. **Never create a global "types" or "models" folder**
+
+### When Unsure
+
+- Default to placing the type inside the domain
+- Ask before moving it to shared
+- Prefer duplication over wrong abstraction
+
+## Useful Patterns
+
+**Branded Types** for type safety:
+
+```typescript
+export type UserId = string & { readonly brand: unique symbol }
+```
+
+**Discriminated Unions** for state:
+
+```typescript
+type AsyncState = 
+  | { status: 'loading' }
+  | { status: 'success'; data: User }
+  | { status: 'error'; error: string }
+```
+
+**Utility Types** (prefer built-in):
+- `Partial<T>`, `Required<T>`, `Readonly<T>`
+- `Pick<T, K>`, `Omit<T, K>`, `Record<K, T>`

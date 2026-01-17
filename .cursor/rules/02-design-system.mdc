@@ -1,0 +1,93 @@
+---
+alwaysApply: true
+---
+
+# Design System
+
+## Technology Stack
+
+| Tool | Purpose |
+|------|---------|
+| **Radix UI** | Unstyled, accessible UI primitives |
+| **Tailwind CSS** | Utility-first styling |
+| **CVA** | Class variance authority for variants |
+| **Lucide React** | Icon library |
+| **cn()** | Utility for className merging (`@/lib/utils`) |
+
+## Component Patterns
+
+### Variant-Based Styling
+
+Use `cva()` for components with multiple variants:
+
+```tsx
+const buttonVariants = cva('base-styles', {
+  variants: {
+    variant: { default: '...', outline: '...' },
+    size: { sm: '...', md: '...', lg: '...' },
+  },
+  defaultVariants: { variant: 'default', size: 'md' },
+})
+```
+
+### Component Structure
+
+```tsx
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
+
+const variants = cva('base', { variants: {...} })
+
+interface Props extends React.HTMLAttributes<HTMLElement>,
+  VariantProps<typeof variants> {}
+
+export const Component = React.forwardRef<HTMLElement, Props>(
+  ({ className, variant, ...props }, ref) => (
+    <element
+      ref={ref}
+      className={cn(variants({ variant }), className)}
+      {...props}
+    />
+  )
+)
+Component.displayName = 'Component'
+```
+
+### Composition Pattern
+
+Use `Slot` from Radix for polymorphic components:
+
+```tsx
+import { Slot } from '@radix-ui/react-slot'
+
+const Button = ({ asChild, ...props }) => {
+  const Comp = asChild ? Slot : 'button'
+  return <Comp {...props} />
+}
+```
+
+## Styling Rules
+
+**Never:**
+- Hardcode colors: `bg-[#3b82f6]`
+- Hardcode spacing: `style={{ margin: '16px' }}`
+- Use inline styles for tokens
+
+**Always:**
+- Use Tailwind tokens: `bg-blue-600 text-sm p-4`
+- Use semantic tokens: `bg-primary text-foreground`
+- Match existing patterns
+
+## File Organization
+
+```
+components/
+  ui/             → Base components (button, card, input)
+  {feature}.tsx   → Feature-specific components
+```
+
+## Accessibility
+
+- Keyboard accessible (Radix handles most)
+- Proper ARIA attributes
+- Sufficient color contrast

@@ -1,0 +1,104 @@
+---
+alwaysApply: true
+---
+
+# React Patterns
+
+## Data Fetching
+
+Use **React Query** (`@tanstack/react-query`) for all server data.
+
+**Custom Hooks Pattern:**
+
+```typescript
+export function useEntity(id: string | null) {
+  return useQuery({
+    queryKey: ['entity', id],
+    queryFn: async () => {
+      const response = await fetchEntity(id)
+      if (response.result === 'failure') throw new Error(response.reason)
+      return response.payload
+    },
+    enabled: !!id,
+  })
+}
+
+export function useUpdateEntity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: updateEntity,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['entity', data.id] })
+    },
+  })
+}
+```
+
+**Location:** `app/hooks/` or `app/{feature}/hooks/`
+
+See `07-implementation-patterns.mdc` for server actions.
+
+## Component Structure
+
+**Server components** by default (no directive needed).
+**Client components** (`'use client'`) only when using:
+- Hooks (`useState`, `useEffect`, React Query)
+- Event handlers
+- Browser APIs
+
+**Organization:**
+
+```tsx
+// 1. Imports
+import { useQuery } from '@tanstack/react-query'
+
+// 2. Types
+interface ComponentProps { id: string }
+
+// 3. Component
+export function Component({ id }: ComponentProps) {
+  const { data, isLoading } = useEntity(id)
+  
+  if (isLoading) return <Spinner />
+  if (!data) return <EmptyState />
+  
+  return <div>{data.name}</div>
+}
+```
+
+## State Management
+
+**Hierarchy:**
+1. Server State → React Query
+2. URL State → Search params
+3. Local UI State → `useState`
+4. Global State → Avoid
+
+**Use `useState` for:**
+- Modals, dropdowns, forms
+- Temporary UI state
+
+**Never store in state:**
+- Server data (use React Query)
+- Data that can be derived
+
+## Performance
+
+Only optimize when profiling shows issues:
+
+```typescript
+import { memo, useMemo, useCallback } from 'react'
+
+const Component = memo(({ data }) => {
+  const processed = useMemo(() => expensiveOperation(data), [data])
+  const handleClick = useCallback(() => console.log(processed), [processed])
+  return <button onClick={handleClick}>{processed}</button>
+})
+```
+
+## Best Practices
+
+- Keep components < 150 lines
+- Extract logic to custom hooks
+- Prefer composition over prop drilling
+- Avoid premature optimization

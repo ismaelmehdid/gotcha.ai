@@ -1,0 +1,7 @@
+.env*
+
+biome.json
+next-env.d.ts
+node_modules
+.next
+.git

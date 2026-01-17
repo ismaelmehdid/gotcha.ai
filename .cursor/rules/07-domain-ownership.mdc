@@ -1,0 +1,126 @@
+---
+alwaysApply: true
+---
+
+# Implementation Patterns
+
+Concrete patterns for each architecture layer. See `01-architecture.mdc` for high-level structure.
+
+---
+
+## Infrastructure Layer
+
+**Location:** `infrastructure/data-access/{entity}/`
+
+Always return `Promise<Result<T, Error>>` using neverthrow:
+
+```typescript
+import { Result, ok, err } from 'neverthrow'
+
+export async function getUserById(id: string): Promise<Result<User, Error>> {
+  try {
+    const user = await db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, id),
+    })
+    
+    if (!user) return err(new Error('User not found'))
+    
+    return ok(mapToUser(user))
+  } catch (error) {
+    return err(unknownToError(error, 'Failed to fetch user'))
+  }
+}
+```
+
+**Rules:**
+- Use Drizzle ORM
+- Wrap in try/catch
+- Return `Result<T, Error>`
+- Never throw exceptions
+
+---
+
+## Application Layer
+
+**Location:** `application/{entity}/`
+
+Server actions that return `ResponseWrapper<T>`:
+
+```typescript
+'use server'
+
+export async function fetchUser(id: string): Promise<ResponseWrapper<UserDTO>> {
+  const currentUser = await getCurrentUser()
+  if (!currentUser) return { result: 'failure', reason: 'Unauthorized' }
+  
+  const result = await getUserById(id)
+  if (result.isErr()) return { result: 'failure', reason: result.error.message }
+  
+  const dto: UserDTO = {
+    id: result.value.id,
+    email: result.value.email,
+    createdAt: result.value.createdAt.toISOString(),
+  }
+  
+  return { result: 'success', payload: dto }
+}
+```
+
+**Rules:**
+- Mark with `'use server'`
+- Check auth with `getCurrentUser()`
+- Transform to DTOs
+- Return `ResponseWrapper<DTO>`
+
+---
+
+## Core Domain
+
+**Location:** `core/{domain}/`
+
+Pure business logic:
+
+```typescript
+export function canUserAccessResource(
+  user: User,
+  resourceOwnerId: string
+): boolean {
+  return user.id === resourceOwnerId || user.role === Role.Admin
+}
+```
+
+**Rules:**
+- Pure functions only
+- No external dependencies
+- Domain types in `core/types/{entity}/`
+
+---
+
+## Presentation Layer
+
+**Location:** `app/`
+
+React components with React Query:
+
+```typescript
+'use client'
+
+export function UserProfile({ userId }: { userId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: async () => {
+      const response = await fetchUser(userId)
+      if (response.result === 'failure') throw new Error(response.reason)
+      return response.payload
+    },
+  })
+  
+  if (isLoading) return <Spinner />
+  return <div>{data.email}</div>
+}
+```
+
+**Rules:**
+- Use React Query for server state
+- Call application layer only
+- Keep components small (<150 lines)

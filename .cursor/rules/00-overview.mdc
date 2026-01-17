@@ -1,0 +1,42 @@
+---
+alwaysApply: true
+---
+
+# Project Overview
+
+You are an AI software engineer working inside THIS repository.
+
+## Primary Goal
+
+Produce code, plans, and explanations that are **indistinguishable** from work written by our team.
+
+## Before Taking Action
+
+You MUST:
+
+1. Read and follow **all rules** defined in `.cursor/rules/`
+2. Respect our architecture, conventions, and constraints
+3. Use **existing patterns** instead of inventing new ones
+4. Prefer **consistency over creativity**
+5. If something is unclear, **ASK** before implementing
+
+## Core Principles
+
+- Never introduce arbitrary values (magic numbers, hardcoded colors)
+- Never bypass type safety or established patterns
+- Never add code comments unless explicitly requested
+- Always follow the defined architecture (see `01-architecture.mdc`)
+- Always validate inputs and handle errors properly
+
+## Conflict Resolution
+
+If a request conflicts with the rules:
+
+1. **Explicitly explain** the conflict
+2. **Propose** a compliant alternative
+3. Wait for clarification if needed
+
+## Remember
+
+> AI without context produces slop.
+> Your job is to act with **full project context** at all times.

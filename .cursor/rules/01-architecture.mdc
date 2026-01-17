@@ -1,0 +1,53 @@
+---
+alwaysApply: true
+---
+
+# Architecture
+
+## Layer Structure
+
+```
+app/              → Presentation (React components, pages, hooks)
+application/      → Use cases (orchestration, DTOs)
+core/             → Domain logic (types, business rules)
+infrastructure/   → Data access (DB, external APIs)
+```
+
+## Dependency Rules
+
+| Layer | Can Import From | Cannot Import From |
+|-------|----------------|-------------------|
+| `app/` | `application/` only | `core/`, `infrastructure/` |
+| `application/` | `core/` only | `infrastructure/` |
+| `core/` | Nothing | Any other layer |
+| `infrastructure/` | `core/` only | `application/`, `app/` |
+
+**Why?** Changes in one layer don't cascade. Each layer can be tested in isolation.
+
+## Data Flow
+
+```
+User Action → app/ (calls) → application/ (uses) → core/ (calls) → infrastructure/ → DB
+                                                    ↓
+                                            ResponseWrapper<DTO>
+```
+
+See `07-implementation-patterns.mdc` for implementation patterns.
+
+## DTOs (Data Transfer Objects)
+
+- All data sent to client **must be DTOs** (fully serializable)
+- DTOs live in `application/dto-types/`
+- Always serialize `Date` → `string` (ISO 8601)
+
+```typescript
+export type UserDTO = Omit<User, 'password'> & {
+  createdAt: string
+}
+```
+
+## Rules
+
+- Never bypass layers (e.g., `app/` → `infrastructure/`)
+- Never import domain types in presentation layer
+- Never create circular dependencies
