@@ -47,7 +47,26 @@ npm install -g pnpm
 pnpm --version  # Should show 9.x.x or higher
 ```
 
-### 3. Redis (Required for notification queue)
+### 3. Python 3.9+ (Required for RTSP stream processing)
+
+**macOS (using Homebrew):**
+```bash
+brew install python@3.11
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install python3 python3-pip
+```
+
+**Verify installation:**
+```bash
+python3 --version  # Should show 3.9.x or higher
+pip3 --version
+```
+
+### 4. Redis (Required for notification queue and camera worker communication)
 
 **macOS (using Homebrew):**
 ```bash
@@ -68,7 +87,7 @@ sudo systemctl enable redis-server
 redis-cli ping  # Should return "PONG"
 ```
 
-### 4. Telegram Bot (For notifications)
+### 5. Telegram Bot (For notifications)
 
 You'll need to create a Telegram bot and get:
 - Bot Token
@@ -85,7 +104,7 @@ git clone <repository-url>
 cd camera-project
 ```
 
-### Step 2: Install Dependencies
+### Step 2: Install Node.js Dependencies
 
 ```bash
 pnpm install
@@ -99,7 +118,20 @@ This will install all project dependencies including:
 - Three.js (for 3D backgrounds)
 - And other dependencies
 
-### Step 3: Environment Variables
+### Step 3: Install Python Dependencies
+
+```bash
+cd python-worker
+pip3 install -r requirements.txt
+cd ..
+```
+
+This will install:
+- `inference` (Roboflow SDK for RTSP stream processing)
+- `redis` (Redis client for Python)
+- `python-dotenv` (Environment variable management)
+
+### Step 4: Environment Variables
 
 Create a `.env` file in the root directory:
 
@@ -127,6 +159,12 @@ TELEGRAM_CHAT_ID=your_chat_id_here
 
 # Webhook Security
 WEBHOOK_SECRET=(openssl rand -hex 32)
+
+# Roboflow Configuration (for Python worker)
+ROBOFLOW_API_KEY=your_roboflow_api_key
+ROBOFLOW_MODEL_ID=shoplifting-detection-oxvwp/1
+ROBOFLOW_CONFIDENCE_THRESHOLD=0.5
+ROBOFLOW_MAX_FPS=5
 ```
 
 ### Telegram Bot Setup
@@ -194,7 +232,27 @@ pnpm worker
 
 The worker processes notification jobs from the queue and sends Telegram messages.
 
-**Important:** Both processes must be running for the notification system to work.
+#### Terminal 3: Camera Worker (Node.js)
+
+```bash
+pnpm camera-worker
+```
+
+The camera worker processes camera start/stop commands and manages RTSP streams via Redis pub/sub.
+
+#### Terminal 4: Python RTSP Worker
+
+```bash
+pnpm python-worker
+```
+
+The Python worker listens for camera commands via Redis and processes RTSP streams using Roboflow Inference SDK.
+
+**Important:** All four processes must be running for the complete system to work:
+1. Next.js server (Terminal 1)
+2. Notification worker (Terminal 2)
+3. Camera worker (Terminal 3)
+4. Python RTSP worker (Terminal 4)
 
 ## Testing
 
@@ -342,6 +400,42 @@ The project follows a **layered architecture**:
 
 See `.cursor/rules/01-architecture.mdc` for detailed architecture guidelines.
 
+## Python Worker
+
+The Python worker is responsible for processing RTSP video streams using Roboflow's Inference SDK. It communicates with the Node.js camera worker via Redis pub/sub channels.
+
+### Architecture
+
+```
+Node.js Camera Worker → Redis Pub/Sub → Python Worker → Roboflow Inference
+                                                          ↓
+Node.js Alert System ← Redis Pub/Sub ← Predictions/Events
+```
+
+### Redis Channels
+
+- **`camera:commands`**: Commands sent from Node.js to Python worker (start/stop)
+- **`camera:predictions:{cameraId}`**: Predictions published by Python worker
+- **`camera:status:{cameraId}`**: Status updates (starting/active/error/stopped)
+
+### Troubleshooting Python Worker
+
+**Issue: Python worker can't connect to Redis**
+- Verify Redis is running: `redis-cli ping`
+- Check `REDIS_HOST` and `REDIS_PORT` in `.env`
+- Ensure Python worker has network access to Redis
+
+**Issue: RTSP stream fails to start**
+- Verify `ROBOFLOW_API_KEY` is set correctly
+- Check RTSP URL format: `rtsp://host:port/path`
+- Ensure camera is accessible from the server
+- Check Python worker logs for detailed error messages
+
+**Issue: No predictions received**
+- Verify model is configured correctly in Roboflow
+- Check `ROBOFLOW_MODEL_ID` matches your Roboflow model (format: `project_id/version_id`)
+- Ensure confidence threshold is appropriate (`ROBOFLOW_CONFIDENCE_THRESHOLD`)
+
 ## Troubleshooting
 
 ### Redis Connection Errors
@@ -444,6 +538,8 @@ curl https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getMe
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
 - `pnpm worker` - Start notification worker
+- `pnpm camera-worker` - Start camera worker (Node.js)
+- `pnpm python-worker` - Start Python RTSP worker
 - `pnpm lint` - Run ESLint
 - `pnpm format` - Format code with Biome
 - `pnpm check` - Check code with Biome

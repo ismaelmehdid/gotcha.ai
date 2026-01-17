@@ -119,6 +119,13 @@ async function sendTelegramMessage(
     const botToken = getBotToken();
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
+    console.log(`[TELEGRAM-API] Calling Telegram API: ${url}`);
+    console.log(`[TELEGRAM-API] Payload:`, JSON.stringify({
+      chat_id: payload.chatId,
+      text: payload.text.substring(0, 100) + '...',
+      parse_mode: payload.parseMode ?? 'HTML',
+    }, null, 2));
+
     await rateLimitedRequest(async () => {
       await executeWithRetry(async () => {
         const response = await fetchWithTimeout(
@@ -135,12 +142,18 @@ async function sendTelegramMessage(
           TIMEOUT_MS,
         );
 
+        console.log(`[TELEGRAM-API] Response status: ${response.status} ${response.statusText}`);
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          console.error(`[TELEGRAM-API] API error response:`, JSON.stringify(errorData, null, 2));
           throw new Error(
             `Telegram API error: ${response.status} - ${JSON.stringify(errorData)}`,
           );
         }
+
+        const responseData = await response.json().catch(() => ({}));
+        console.log(`[TELEGRAM-API] Success response:`, JSON.stringify(responseData, null, 2));
       });
     });
 
@@ -150,7 +163,10 @@ async function sendTelegramMessage(
       error,
       'Failed to send Telegram message',
     );
-    console.error('Telegram message send failed:', normalizedError.message);
+    console.error('[TELEGRAM-API] Telegram message send failed:', normalizedError.message);
+    if (normalizedError.stack) {
+      console.error('[TELEGRAM-API] Error stack:', normalizedError.stack);
+    }
     return err(normalizedError);
   }
 }
@@ -161,6 +177,14 @@ async function sendTelegramPhoto(
   try {
     const botToken = getBotToken();
     const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+
+    console.log(`[TELEGRAM-API] Calling Telegram API for photo: ${url}`);
+    console.log(`[TELEGRAM-API] Photo payload:`, JSON.stringify({
+      chat_id: payload.chatId,
+      photo: payload.photoUrl,
+      caption: payload.caption?.substring(0, 100) + '...',
+      parse_mode: payload.parseMode ?? 'HTML',
+    }, null, 2));
 
     await rateLimitedRequest(async () => {
       await executeWithRetry(async () => {
@@ -179,12 +203,18 @@ async function sendTelegramPhoto(
           TIMEOUT_MS,
         );
 
+        console.log(`[TELEGRAM-API] Photo response status: ${response.status} ${response.statusText}`);
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          console.error(`[TELEGRAM-API] Photo API error response:`, JSON.stringify(errorData, null, 2));
           throw new Error(
             `Telegram API error: ${response.status} - ${JSON.stringify(errorData)}`,
           );
         }
+
+        const responseData = await response.json().catch(() => ({}));
+        console.log(`[TELEGRAM-API] Photo success response:`, JSON.stringify(responseData, null, 2));
       });
     });
 
@@ -194,7 +224,10 @@ async function sendTelegramPhoto(
       error,
       'Failed to send Telegram photo',
     );
-    console.error('Telegram photo send failed:', normalizedError.message);
+    console.error('[TELEGRAM-API] Telegram photo send failed:', normalizedError.message);
+    if (normalizedError.stack) {
+      console.error('[TELEGRAM-API] Error stack:', normalizedError.stack);
+    }
     return err(normalizedError);
   }
 }
@@ -207,6 +240,17 @@ export class TelegramNotificationService implements NotificationService {
   }
 
   async send(message: NotificationMessage): Promise<Result<void, Error>> {
+    console.log(`[TELEGRAM] Sending notification to chat ${this.chatId}`);
+    console.log(`[TELEGRAM] Message text:`, message.text);
+    console.log(`[TELEGRAM] Has image: ${!!message.imageUrl}`);
+    if (message.imageUrl) {
+      console.log(`[TELEGRAM] Image URL: ${message.imageUrl}`);
+    }
+    if (message.caption) {
+      console.log(`[TELEGRAM] Caption: ${message.caption}`);
+    }
+    
+    console.log(`[TELEGRAM] Sending text message...`);
     const messageResult = await sendTelegramMessage({
       chatId: this.chatId,
       text: message.text,
@@ -214,10 +258,14 @@ export class TelegramNotificationService implements NotificationService {
     });
 
     if (messageResult.isErr()) {
+      console.error(`[TELEGRAM] Failed to send text message:`, messageResult.error.message);
       return messageResult;
     }
 
+    console.log(`[TELEGRAM] Text message sent successfully`);
+
     if (message.imageUrl) {
+      console.log(`[TELEGRAM] Sending photo...`);
       const photoResult = await sendTelegramPhoto({
         chatId: this.chatId,
         photoUrl: message.imageUrl,
@@ -227,12 +275,15 @@ export class TelegramNotificationService implements NotificationService {
 
       if (photoResult.isErr()) {
         console.warn(
-          'Photo attachment failed, but message was sent:',
+          '[TELEGRAM] Photo attachment failed, but message was sent:',
           photoResult.error.message,
         );
+      } else {
+        console.log(`[TELEGRAM] Photo sent successfully`);
       }
     }
 
+    console.log(`[TELEGRAM] Notification sent completely`);
     return ok(undefined);
   }
 }

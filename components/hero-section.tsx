@@ -9,8 +9,7 @@ const features = [
     title: 'Real-time Detection',
     description:
       'AI-powered monitoring system that watches your store 24/7, detecting suspicious behavior instantly.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?q=80&w=2070',
+    imageUrl: '/landing-preview.gif',
     bgColor: 'bg-lime-500/10',
     textColor: 'text-white',
   },
@@ -19,8 +18,7 @@ const features = [
     title: 'Instant Alerts',
     description:
       'Get notified immediately when suspicious activity is detected. Never miss a critical moment.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?q=80&w=2070',
+    imageUrl: '/notification.png',
     bgColor: 'bg-green-500/10',
     textColor: 'text-white',
   },
@@ -125,10 +123,12 @@ export function HeroSection() {
                   </div>
 
                   <div className="mt-8 md:mt-0 relative z-20">
-                    <div className="w-full aspect-video bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center border border-lime-500/30">
-                      <span className="text-lime-400 text-sm">
-                        Visual placeholder
-                      </span>
+                    <div className="w-full aspect-video bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center border border-lime-500/30 overflow-hidden">
+                      <img
+                        src={feature.imageUrl}
+                        alt={feature.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
                 </div>
