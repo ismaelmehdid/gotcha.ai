@@ -18,7 +18,7 @@ const features = [
     title: 'Instant Alerts',
     description:
       'Get notified immediately when suspicious activity is detected. Never miss a critical moment.',
-    imageUrl: '/notification.png',
+    imageUrl: '/notifications.png',
     bgColor: 'bg-green-500/10',
     textColor: 'text-white',
   },
@@ -28,7 +28,7 @@ const features = [
     description:
       'Track incidents, patterns, and trends with comprehensive analytics and reporting.',
     imageUrl:
-      'https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?q=80&w=2070',
+      '/analytics.png',
     bgColor: 'bg-emerald-500/10',
     textColor: 'text-white',
   },
@@ -106,6 +106,8 @@ export function HeroSection() {
                       linear-gradient(90deg, rgba(180, 255, 180, 0.05) 1px, transparent 1px)
                     `,
                     backgroundSize: '20px 20px',
+                    boxShadow:
+                      '0 0 20px rgba(132, 204, 22, 0.15), 0 0 40px rgba(132, 204, 22, 0.08)',
                   }}
                 >
                   <div
