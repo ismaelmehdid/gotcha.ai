@@ -1,8 +1,8 @@
 'use client';
 
 import { Power, PowerOff, Video } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 import type { CameraDTO } from '@/application/dto-types/camera-dto';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -130,7 +130,9 @@ export function CameraCard({ camera, onUpdate }: CameraCardProps) {
               }}
               onError={(error) => {
                 console.error('Video player error:', error);
-                setError('Failed to load video stream. RTSP streams require HLS conversion.');
+                setError(
+                  'Failed to load video stream. RTSP streams require HLS conversion.',
+                );
               }}
             />
           </div>
