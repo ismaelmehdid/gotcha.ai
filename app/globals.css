@@ -123,3 +123,37 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes border-follow {
+  0% {
+    top: 0;
+    left: 0;
+  }
+  25% {
+    top: 0;
+    left: calc(100% - 12px);
+  }
+  50% {
+    top: calc(100% - 12px);
+    left: calc(100% - 12px);
+  }
+  75% {
+    top: calc(100% - 12px);
+    left: 0;
+  }
+  100% {
+    top: 0;
+    left: 0;
+  }
+}
+
+@keyframes border-pulse {
+  0%, 100% {
+    border-color: rgba(163, 230, 53, 0.3);
+    box-shadow: 0 0 10px rgba(163, 230, 53, 0.2);
+  }
+  50% {
+    border-color: rgba(163, 230, 53, 0.8);
+    box-shadow: 0 0 20px rgba(163, 230, 53, 0.5);
+  }
+}
